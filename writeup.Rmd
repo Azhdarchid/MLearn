@@ -1,0 +1,53 @@
+---
+title: "Data Science Machine Learning Project"
+output: html_document
+---
+
+The purpose of this assignment is to predict the class of exercise ("classe") done by participants in a study by examing other measured variables.
+
+First I loaded necessary packages and the data (& test data provided us) into R.
+```{r warning=FALSE, message=FALSE}
+library(caret)
+library(randomForest)
+ testing <- read.csv("pml-testing.csv", header = TRUE,na.strings=c("NA",""))
+training <- read.csv("pml-training.csv", header = TRUE,na.strings=c("NA",""))
+```
+I removed any obviously uninformative columns as well as those with incomplete data ('NA' values).
+```{r}
+removecols <- grepl("X|user_name|new_window|timestamp|num_window", colnames(testing))
+testing <- testing[, !removecols]
+training <- training[, !removecols]
+training <- training[ , ! apply( training , 2 , function(x) any(is.na(x)) ) ]
+testing <- testing[ , ! apply( testing , 2 , function(x) any(is.na(x)) ) ]
+```
+In order to prepare for cross validation I partitioned part of the training set and used the partition to create two separate datasets.  I chose a 60/40 ratio.
+```{r}
+partitioning = createDataPartition(y=training$classe, p=0.6, list=FALSE)
+partValid = training[-partitioning, ]
+partTraining = training[partitioning, ]
+```
+Next, I fit a model to our partioned training data using random forest classification. (Note that I did not use formula for this so as to cut down on computing time.) 
+
+That fit model was then cross validated against both the larger training data set and the smaller validation subset to check that its accuracy/error rate was acceptable.
+```{r}
+modFit <- randomForest(partTraining[ ,1:52], partTraining$classe)
+crossTrain <- predict(modFit, partTraining[ ,1:52])
+crossValidate <- predict(modFit, partValid[ ,1:52])
+accuracy <- postResample(partValid$classe, crossValidate)
+accuracy <- accuracy[[1]]
+```
+Accuracy:
+```{r}
+print(accuracy)
+```
+Out of Sample error rate:
+```{r}
+print((1-accuracy))
+```
+With high accuracy and a low error rate, I then went ahead and used the fit model to predict for the provided test data:
+```{r}
+predict <- predict(modFit, newdata=testing)
+print(predict)
+```
+
+
