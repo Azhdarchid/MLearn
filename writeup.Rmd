@@ -17,14 +17,14 @@ I removed any obviously uninformative columns as well as those with incomplete d
 removecols <- grepl("X|user_name|new_window|timestamp|num_window", colnames(testing))
 testing <- testing[, !removecols]
 training <- training[, !removecols]
-training <- training[ , ! apply( training , 2 , function(x) any(is.na(x)) ) ]
-testing <- testing[ , ! apply( testing , 2 , function(x) any(is.na(x)) ) ]
+training <- training[ , ! apply(training, 2, function(x) any(is.na(x)))]
+testing <- testing[ , !apply(testing, 2, function(x) any(is.na(x)))]
 ```
 In order to prepare for cross validation I partitioned part of the training set and used the partition to create two separate datasets.  I chose a 60/40 ratio.
 ```{r}
-partitioning = createDataPartition(y=training$classe, p=0.6, list=FALSE)
-partValid = training[-partitioning, ]
-partTraining = training[partitioning, ]
+partitioning <- createDataPartition(y=training$classe, p=0.6, list=FALSE)
+partValid <- training[-partitioning, ]
+partTraining <- training[partitioning, ]
 ```
 Next, I fit a model to our partioned training data using random forest classification. (Note that I did not use formula for this so as to cut down on computing time.) 
 

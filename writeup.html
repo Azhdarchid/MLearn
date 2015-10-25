@@ -65,12 +65,12 @@ training &lt;- read.csv(&quot;pml-training.csv&quot;, header = TRUE,na.strings=c
 <pre class="r"><code>removecols &lt;- grepl(&quot;X|user_name|new_window|timestamp|num_window&quot;, colnames(testing))
 testing &lt;- testing[, !removecols]
 training &lt;- training[, !removecols]
-training &lt;- training[ , ! apply( training , 2 , function(x) any(is.na(x)) ) ]
-testing &lt;- testing[ , ! apply( testing , 2 , function(x) any(is.na(x)) ) ]</code></pre>
+training &lt;- training[ , ! apply(training, 2, function(x) any(is.na(x)))]
+testing &lt;- testing[ , !apply(testing, 2, function(x) any(is.na(x)))]</code></pre>
 <p>In order to prepare for cross validation I partitioned part of the training set and used the partition to create two separate datasets. I chose a 60/40 ratio.</p>
-<pre class="r"><code>partitioning = createDataPartition(y=training$classe, p=0.6, list=FALSE)
-partValid = training[-partitioning, ]
-partTraining = training[partitioning, ]</code></pre>
+<pre class="r"><code>partitioning &lt;- createDataPartition(y=training$classe, p=0.6, list=FALSE)
+partValid &lt;- training[-partitioning, ]
+partTraining &lt;- training[partitioning, ]</code></pre>
 <p>Next, I fit a model to our partioned training data using random forest classification. (Note that I did not use formula for this so as to cut down on computing time.)</p>
 <p>That fit model was then cross validated against both the larger training data set and the smaller validation subset to check that its accuracy/error rate was acceptable.</p>
 <pre class="r"><code>modFit &lt;- randomForest(partTraining[ ,1:52], partTraining$classe)
